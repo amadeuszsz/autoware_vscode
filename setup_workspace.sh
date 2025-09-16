@@ -40,7 +40,7 @@ show_help() {
 set -e
 
 # Check for help flag
-if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
+if [[ $1 == "--help" ]] || [[ $1 == "-h" ]]; then
     show_help
     exit 0
 fi
@@ -78,7 +78,7 @@ BACKUP_TIMESTAMP=""
 
 # Function to get or create backup timestamp
 get_backup_timestamp() {
-    if [[ -z "$BACKUP_TIMESTAMP" ]]; then
+    if [[ -z $BACKUP_TIMESTAMP ]]; then
         BACKUP_TIMESTAMP=$(date +%Y%m%d_%H%M%S)
     fi
     echo "$BACKUP_TIMESTAMP"
@@ -88,48 +88,49 @@ get_backup_timestamp() {
 ask_question() {
     local question="$1"
     local response
-    
+
     # Check if auto-answer is enabled
-    if [[ "$AUTO_YES" == true ]]; then
+    if [[ $AUTO_YES == true ]]; then
         echo -e "\n${YELLOW}$question${NC}"
         echo -e "${GREEN}[AUTO: YES]${NC}"
         return 0
     fi
-    
+
     echo -e "\n${YELLOW}$question${NC}"
     echo -e "${BLUE}[Y/n/A] (default: all yes, Y=yes once, A=all yes):${NC} \c"
     read -r response
-    
+
     # Default to "all yes" if empty response
     response=${response:-a}
-    
+
     case "$response" in
-        [yY]|[yY][eE][sS]) return 0 ;;
-        [aA]|[aA][lL][lL]) 
-            AUTO_YES=true
-            print_info "All remaining questions will be answered 'yes'"
-            return 0 ;;
-        *) return 1 ;;
+    [yY] | [yY][eE][sS]) return 0 ;;
+    [aA] | [aA][lL][lL])
+        AUTO_YES=true
+        print_info "All remaining questions will be answered 'yes'"
+        return 0
+        ;;
+    *) return 1 ;;
     esac
 }
 
 # Function to backup workspace configuration directories to repository
 backup_workspace_config() {
     local source_dir="$1"
-    local config_name="$2"  # .vscode or .devcontainer
-    
-    if [[ -d "$source_dir" ]]; then
+    local config_name="$2" # .vscode or .devcontainer
+
+    if [[ -d $source_dir ]]; then
         # Create backup directory if it doesn't exist
         local backup_base_dir="$SCRIPT_DIR/backup"
         mkdir -p "$backup_base_dir"
-        
+
         local timestamp
         timestamp=$(get_backup_timestamp)
         local timestamped_backup_dir="$backup_base_dir/$timestamp"
         mkdir -p "$timestamped_backup_dir"
-        
+
         local backup_dir="$timestamped_backup_dir/$config_name"
-        
+
         print_info "Moving existing $config_name to repository backup: $backup_dir"
         mv "$source_dir" "$backup_dir"
         print_success "Moved to: $backup_dir"
@@ -141,42 +142,42 @@ backup_workspace_config() {
 # Function to check if dependencies are installed
 check_dependencies() {
     local missing_deps=()
-    
+
     # Check for VS Code
-    if ! command -v code &> /dev/null; then
+    if ! command -v code &>/dev/null; then
         missing_deps+=("VS Code")
     fi
-    
+
     # Check for Docker
-    if ! command -v docker &> /dev/null; then
+    if ! command -v docker &>/dev/null; then
         missing_deps+=("Docker")
     fi
-    
+
     # Check for NVIDIA driver
-    if ! command -v nvidia-smi &> /dev/null; then
+    if ! command -v nvidia-smi &>/dev/null; then
         missing_deps+=("NVIDIA driver")
     fi
-    
+
     # Check for NVIDIA Container Toolkit
     if ! grep -q "nvidia-container-toolkit" /etc/apt/sources.list.d/nvidia-container-toolkit.list 2>/dev/null; then
         missing_deps+=("NVIDIA Container Toolkit")
     fi
-    
+
     # Check for CycloneDDS configuration
     if [[ ! -f /etc/sysctl.d/10-cyclone-max.conf ]]; then
         missing_deps+=("CycloneDDS configuration")
     fi
-    
+
     # Check for multicasting service
     if [[ ! -f /etc/systemd/system/multicasting.service ]]; then
         missing_deps+=("Multicasting service")
     fi
-    
+
     # Check for vcstool
-    if ! command -v vcs &> /dev/null; then
+    if ! command -v vcs &>/dev/null; then
         missing_deps+=("vcstool")
     fi
-    
+
     # Return results only if there are actually missing dependencies
     if [[ ${#missing_deps[@]} -gt 0 ]]; then
         echo "${missing_deps[@]}"
@@ -198,13 +199,13 @@ else
     print_info "  • Press Enter or A/a = Yes to ALL remaining questions (default)"
     print_info "  • Type Y/y = Yes to current question only"
     print_info "  • Type N/n = No"
-    
+
     # Ask for workspace path
     echo ""
     echo -e "${YELLOW}Enter the path to your Autoware workspace:${NC}"
     echo -e "${BLUE}(default: ~/autoware):${NC} \c"
     read -r workspace_path
-    
+
     # Set default workspace path
     workspace_path=${workspace_path:-~/autoware}
 fi
@@ -213,7 +214,7 @@ fi
 workspace_path="${workspace_path/#\~/$HOME}"
 
 # Check if workspace exists
-if [[ ! -d "$workspace_path" ]]; then
+if [[ ! -d $workspace_path ]]; then
     print_error "Workspace directory does not exist: $workspace_path"
     print_error "Please create the workspace directory first or specify an existing one."
     exit 1
@@ -235,7 +236,7 @@ if [[ -d "$workspace_path/.devcontainer" ]]; then
     print_warning "Found existing .devcontainer directory in workspace"
 fi
 
-if [[ "$vscode_exists" == true ]] || [[ "$devcontainer_exists" == true ]]; then
+if [[ $vscode_exists == true ]] || [[ $devcontainer_exists == true ]]; then
     echo ""
     print_warning "Existing VS Code/devcontainer configuration found!"
     if ! ask_question "Do you want to continue? (Existing files may be overridden)"; then
@@ -248,23 +249,23 @@ fi
 if ask_question "Do you want to copy VS Code and Dev Containers configuration to the workspace?"; then
     # Check if data directory exists in script location
     data_dir="$SCRIPT_DIR/workspace"
-    if [[ -d "$data_dir" ]]; then
+    if [[ -d $data_dir ]]; then
         print_info "Copying workspace configuration files..."
-        
+
         # Copy .vscode directory if it exists
         if [[ -d "$data_dir/.vscode" ]]; then
             backup_workspace_config "$workspace_path/.vscode" ".vscode"
             cp -r "$data_dir/.vscode" "$workspace_path/"
             print_success "VS Code configuration copied to workspace"
         fi
-        
+
         # Copy .devcontainer directory if it exists
         if [[ -d "$data_dir/.devcontainer" ]]; then
             backup_workspace_config "$workspace_path/.devcontainer" ".devcontainer"
             cp -r "$data_dir/.devcontainer" "$workspace_path/"
             print_success "Devcontainer configuration copied to workspace"
         fi
-        
+
         print_success "Workspace configuration files installed"
     else
         print_warning "Configuration data directory not found: $data_dir"
@@ -277,7 +278,7 @@ fi
 # Create required directories for Dev Containers
 if ask_question "Do you want to create required directories for Dev Containers development?"; then
     print_info "Creating required directories..."
-    
+
     directories=(
         "$HOME/autoware_data"
         "$HOME/autoware_map"
@@ -286,9 +287,9 @@ if ask_question "Do you want to create required directories for Dev Containers d
         "$HOME/.config/Lichtblick"
         "$HOME/.ccache"
     )
-    
+
     for dir in "${directories[@]}"; do
-        if [[ ! -d "$dir" ]]; then
+        if [[ ! -d $dir ]]; then
             print_info "Creating directory: $dir"
             mkdir -p "$dir"
             print_success "Created: $dir"
@@ -296,7 +297,7 @@ if ask_question "Do you want to create required directories for Dev Containers d
             print_info "Directory already exists: $dir"
         fi
     done
-    
+
     print_success "All required directories are ready"
 else
     print_info "Skipping directory creation"
@@ -312,11 +313,11 @@ else
     print_warning "Some dependencies are missing or not properly configured:"
     for dep in "${missing_deps[@]}"; do
         # Only print non-empty dependencies
-        if [[ -n "$dep" ]]; then
+        if [[ -n $dep ]]; then
             print_warning "  • $dep"
         fi
     done
-    
+
     echo ""
     print_info "To install missing dependencies, check README.md."
 fi

@@ -53,6 +53,7 @@ tmux kill-session -t session_name
 1. Run VS Code with Dev Containers to activate container environment.
 
 2. Start tmux:
+
    ```bash
    tmux
    ```
@@ -71,6 +72,7 @@ tmux kill-session -t session_name
 ### Example Development Session
 
 1. Start tmux with a new session name:
+
    ```bash
    tmux new -s autoware
    ```
@@ -102,6 +104,7 @@ tmux kill-session -t session_name
 ### Nested Tmux Sessions
 
 When using tmux on a remote server that also has tmux:
+
 1. Use `Ctrl+b` then `b` to send commands to the inner session
 2. For example: `Ctrl+b` then `b` then `c` creates a new window in the inner session
 
@@ -161,6 +164,7 @@ zellij kill-session my_session
 ## Example Autoware Workflow with Zellij
 
 1. Start a new named session:
+
    ```bash
    zellij --session autoware
    ```

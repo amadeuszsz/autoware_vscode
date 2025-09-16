@@ -4,9 +4,9 @@ This role installs Visual Studio Code and extensions defined in the Autoware dev
 
 ## Inputs
 
-| Variable                 | Description                                         | Default                                                         |
-| ------------------------ | --------------------------------------------------- | --------------------------------------------------------------- |
-| `devcontainer_json_path` | Path to devcontainer.json file                      | `workspace/.devcontainer/universe-devel-cuda/devcontainer.json` |
+| Variable                 | Description                    | Default                                                         |
+| ------------------------ | ------------------------------ | --------------------------------------------------------------- |
+| `devcontainer_json_path` | Path to devcontainer.json file | `workspace/.devcontainer/universe-devel-cuda/devcontainer.json` |
 
 ## Manual Installation
 

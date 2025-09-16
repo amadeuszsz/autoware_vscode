@@ -12,7 +12,7 @@ BRIDGE_PID=
 # --- Help Message ---
 # Displays usage information for the script.
 show_help() {
-  cat << EOF
+    cat <<EOF
 Usage: $(basename "$0") [-h|--help] [--port PORT] [ros_launch_args...]
 
 Launches the Foxglove bridge and lichtblick client.
@@ -42,85 +42,85 @@ EOF
 # --- Cleanup Function ---
 # Ensures the background foxglove_bridge process is terminated when the script exits.
 cleanup() {
-  # Check if the BRIDGE_PID variable is set and refers to a running process
-  if [[ -n "$BRIDGE_PID" && -e /proc/"$BRIDGE_PID" ]]; then
-    echo -e "\nShutting down Foxglove bridge (PID: ${BRIDGE_PID})..."
-    # Kill the process and suppress output
-    kill "$BRIDGE_PID" > /dev/null 2>&1
-  fi
+    # Check if the BRIDGE_PID variable is set and refers to a running process
+    if [[ -n $BRIDGE_PID && -e /proc/"$BRIDGE_PID" ]]; then
+        echo -e "\nShutting down Foxglove bridge (PID: ${BRIDGE_PID})..."
+        # Kill the process and suppress output
+        kill "$BRIDGE_PID" >/dev/null 2>&1
+    fi
 }
 
 # --- Main Logic ---
 main() {
-  local port="${DEFAULT_PORT}"
-  # Use an array to safely store ROS launch arguments
-  local ros_args=()
+    local port="${DEFAULT_PORT}"
+    # Use an array to safely store ROS launch arguments
+    local ros_args=()
 
-  # --- Argument Parsing ---
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      -h|--help)
-        show_help
-        exit 0
-        ;;
-      --port)
-        # Check if the port number is a valid integer in the correct range
-        if [[ -n "$2" && "$2" =~ ^[0-9]+$ && "$2" -ge 1024 && "$2" -le 65535 ]]; then
-          port="$2"
-          shift 2 # Consume '--port' and its value
-        else
-          echo "Error: --port requires a valid port number (1024-65535)." >&2
-          exit 1
+    # --- Argument Parsing ---
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+        -h | --help)
+            show_help
+            exit 0
+            ;;
+        --port)
+            # Check if the port number is a valid integer in the correct range
+            if [[ -n $2 && $2 =~ ^[0-9]+$ && $2 -ge 1024 && $2 -le 65535 ]]; then
+                port="$2"
+                shift 2 # Consume '--port' and its value
+            else
+                echo "Error: --port requires a valid port number (1024-65535)." >&2
+                exit 1
+            fi
+            ;;
+        *)
+            # Assume all other arguments are for ros2 launch
+            ros_args+=("$1")
+            shift
+            ;;
+        esac
+    done
+
+    # --- Port Availability Check ---
+    echo "Checking if port ${port} is available..."
+    if ss -tuln | grep -q ":${port}\b"; then
+        echo "Error: Port ${port} is already in use." >&2
+        echo "Please free the port or use the --port option to specify another." >&2
+        # You can optionally show which process is using the port if 'lsof' is available
+        if command -v lsof &>/dev/null; then
+            echo "Port is being used by:"
+            lsof -i :"${port}"
         fi
-        ;;
-      *)
-        # Assume all other arguments are for ros2 launch
-        ros_args+=("$1")
-        shift
-        ;;
-    esac
-  done
-
-  # --- Port Availability Check ---
-  echo "Checking if port ${port} is available..."
-  if ss -tuln | grep -q ":${port}\b"; then
-    echo "Error: Port ${port} is already in use." >&2
-    echo "Please free the port or use the --port option to specify another." >&2
-    # You can optionally show which process is using the port if 'lsof' is available
-    if command -v lsof &> /dev/null; then
-        echo "Port is being used by:"
-        lsof -i :"${port}"
+        exit 1
     fi
-    exit 1
-  fi
 
-  # --- Execution ---
-  echo "Terminating any existing Foxglove bridge instances..."
-  # Use pkill to find and kill processes matching the launch file name
-  pkill -f "foxglove_bridge_launch.xml" > /dev/null 2>&1 || true # '|| true' prevents exit on no-match
+    # --- Execution ---
+    echo "Terminating any existing Foxglove bridge instances..."
+    # Use pkill to find and kill processes matching the launch file name
+    pkill -f "foxglove_bridge_launch.xml" >/dev/null 2>&1 || true # '|| true' prevents exit on no-match
 
-  echo "Launching Foxglove bridge on port ${port}..."
-  # Launch the bridge in the background
-  ros2 launch foxglove_bridge foxglove_bridge_launch.xml \
-    send_buffer_limit:=1000000000 \
-    port:="${port}" \
-    "${ros_args[@]}" &
+    echo "Launching Foxglove bridge on port ${port}..."
+    # Launch the bridge in the background
+    ros2 launch foxglove_bridge foxglove_bridge_launch.xml \
+        send_buffer_limit:=1000000000 \
+        port:="${port}" \
+        "${ros_args[@]}" &
 
-  # Capture the PID of the last background command
-  BRIDGE_PID=$!
+    # Capture the PID of the last background command
+    BRIDGE_PID=$!
 
-  echo "Foxglove bridge started with PID: ${BRIDGE_PID}."
-  # Add a small delay to ensure the server starts before the client tries to connect
-  sleep 1 
+    echo "Foxglove bridge started with PID: ${BRIDGE_PID}."
+    # Add a small delay to ensure the server starts before the client tries to connect
+    sleep 1
 
-  echo "Launching lichtblick..."
-  # Launch the client application 
-  lichtblick "lichtblick://open?ds=foxglove-websocket&ds.url=ws://localhost:${port}/"
+    echo "Launching lichtblick..."
+    # Launch the client application
+    lichtblick "lichtblick://open?ds=foxglove-websocket&ds.url=ws://localhost:${port}/"
 
-  echo "Bridge is running. Press Ctrl+C to stop."
-  # Wait for the bridge process to terminate. This keeps the script alive.
-  # When the user presses Ctrl+C, the trap will trigger the cleanup function.
-  wait "$BRIDGE_PID"
+    echo "Bridge is running. Press Ctrl+C to stop."
+    # Wait for the bridge process to terminate. This keeps the script alive.
+    # When the user presses Ctrl+C, the trap will trigger the cleanup function.
+    wait "$BRIDGE_PID"
 }
 
 # --- Script Entrypoint ---

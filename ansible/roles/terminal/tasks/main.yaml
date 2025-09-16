@@ -43,7 +43,7 @@
   copy:
     src: "{{ tmux_config_source }}"
     dest: "{{ tmux_config_dest | expanduser }}"
-    mode: '0644'
+    mode: "0644"
   when: install_tmux and copy_tmux_config
 
 - name: Create temporary directory for zellij
@@ -57,7 +57,7 @@
   get_url:
     url: "{{ zellij_download_url }}"
     dest: "{{ zellij_temp_dir.path }}/zellij.tar.gz"
-    mode: '0644'
+    mode: "0644"
   when: install_zellij
 
 - name: Extract zellij
@@ -71,7 +71,7 @@
   copy:
     src: "{{ zellij_temp_dir.path }}/zellij"
     dest: "{{ zellij_install_dir }}/zellij"
-    mode: '0755'
+    mode: "0755"
     remote_src: yes
   become: true
   when: install_zellij

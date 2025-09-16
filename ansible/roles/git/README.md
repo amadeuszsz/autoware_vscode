@@ -4,11 +4,11 @@ This role installs Git and configures an enhanced shell prompt with Git integrat
 
 ## Inputs
 
-| Variable                  | Description                                | Default         |
-| ------------------------- | ------------------------------------------ | --------------- |
-| `bashrc_file`             | Path to bashrc file to modify              | `~/.bashrc`     |
-| `install_bash_completion` | Whether to install bash-completion         | `true`          |
-| `include_host_prefix`     | Whether to include (host) prefix in prompt | `true`          |
+| Variable                  | Description                                | Default     |
+| ------------------------- | ------------------------------------------ | ----------- |
+| `bashrc_file`             | Path to bashrc file to modify              | `~/.bashrc` |
+| `install_bash_completion` | Whether to install bash-completion         | `true`      |
+| `include_host_prefix`     | Whether to include (host) prefix in prompt | `true`      |
 
 ## Manual Installation
 

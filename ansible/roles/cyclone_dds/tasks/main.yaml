@@ -14,7 +14,7 @@
     dest: "{{ sysctl_conf_path }}"
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   become: true
   when: install_cyclone_config
 

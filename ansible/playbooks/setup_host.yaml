@@ -2,7 +2,7 @@
 - name: Setup Autoware Development Environment
   hosts: localhost
   become: false
-  
+
   tasks:
     - name: Introduction
       debug:

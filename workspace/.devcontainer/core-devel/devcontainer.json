@@ -6,9 +6,7 @@
     "args": {
       "BASE_IMAGE": "ghcr.io/autowarefoundation/autoware:core-devel"
     },
-    "options": [
-      "--network=host"
-    ]
+    "options": ["--network=host"]
   },
   "remoteUser": "autoware",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",

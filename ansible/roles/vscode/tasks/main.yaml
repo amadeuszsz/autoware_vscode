@@ -73,7 +73,7 @@
   with_items: "{{ vscode_extensions }}"
   register: vscode_result
   changed_when: "'already installed' not in vscode_result.stdout"
-  failed_when: 
+  failed_when:
     - vscode_result.rc != 0
     - "'already installed' not in vscode_result.stdout"
   ignore_errors: true

@@ -4,11 +4,11 @@ This role installs and configures terminal multiplexers (tmux or zellij) for Aut
 
 ## Inputs
 
-| Variable            | Description                                | Default |
-|---------------------|--------------------------------------------|---------|
-| `install_tmux`      | Whether to install tmux                    | `true`  |
-| `install_zellij`    | Whether to install zellij                  | `false` |
-| `tmux_config_file`  | Path to tmux configuration file            | `~/.tmux.conf` |
+| Variable           | Description                     | Default        |
+| ------------------ | ------------------------------- | -------------- |
+| `install_tmux`     | Whether to install tmux         | `true`         |
+| `install_zellij`   | Whether to install zellij       | `false`        |
+| `tmux_config_file` | Path to tmux configuration file | `~/.tmux.conf` |
 
 ## Manual Installation
 

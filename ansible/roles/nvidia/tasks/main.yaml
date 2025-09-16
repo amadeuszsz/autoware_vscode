@@ -22,14 +22,14 @@
 - name: Check if installed driver version meets minimum requirements
   fail:
     msg: "Current NVIDIA driver version {{ nvidia_installed_version.stdout }} is less than minimum required version {{ min_nvidia_driver_version }}. Please update your driver."
-  when: 
+  when:
     - nvidia_smi_result.rc == 0
     - nvidia_installed_version.stdout | int < min_nvidia_driver_version | int
 
 - name: Notify that installed driver meets minimum requirements
   debug:
     msg: "Current NVIDIA driver version {{ nvidia_installed_version.stdout }} meets minimum requirements ({{ min_nvidia_driver_version }})."
-  when: 
+  when:
     - nvidia_smi_result.rc == 0
     - nvidia_installed_version.stdout | int >= min_nvidia_driver_version | int
 
@@ -42,14 +42,14 @@
   pause:
     prompt: "No NVIDIA driver detected. Do you want to install NVIDIA driver version {{ nvidia_driver_version }}? (y/n)"
   register: driver_install_response
-  when: 
+  when:
     - nvidia_smi_result.rc != 0
     - ansible_connection != 'local' or lookup('env', 'CI') != 'true'
 
 - name: Override driver installation flag based on user input
   set_fact:
     proceed_with_driver_install: "{{ driver_install_response.user_input | default('y') | lower == 'y' }}"
-  when: 
+  when:
     - nvidia_smi_result.rc != 0
     - driver_install_response is defined and driver_install_response.user_input is defined
 

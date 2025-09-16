@@ -1,201 +1,168 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json forma
-    "version": "2.0.0",
-    "tasks": [
-        // Build tasks
-        {
-            "label": "Build: Workspace (Release)",
-            "detail": "Build workspace with release build type.",
-            "type": "shell",
-            "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On",
-            "problemMatcher": [
-                "$gcc",
-                "$nvcc"
-            ]
-        },
-        {
-            "label": "Build: Workspace (Debug)",
-            "detail": "Build workspace with release build type.",
-            "type": "shell",
-            "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On",
-            "problemMatcher": [
-                "$gcc",
-                "$nvcc"
-            ]
-        },
-        {
-            "label": "Build: Package (Release)",
-            "detail": "Build single package with release build type.",
-            "type": "shell",
-            "command": "colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-select ${input:package}",
-            "problemMatcher": [
-                "$gcc",
-                "$nvcc"
-            ]
-        },
-        {
-            "label": "Build: Package (Debug)",
-            "detail": "Build single package with debug build type.",
-            "type": "shell",
-            "command": "colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-select ${input:package}",
-            "problemMatcher": [
-                "$gcc",
-                "$nvcc"
-            ]
-        },
-        {
-            "label": "Build: Package up-to (Release)",
-            "detail": "Build up-to package with release build type.",
-            "type": "shell",
-            "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-up-to ${input:package}",
-            "problemMatcher": [
-                "$gcc",
-                "$nvcc"
-            ]
-        },
-        {
-            "label": "Build: Package up-to (Debug)",
-            "detail": "Build up-to package with debug build type.",
-            "type": "shell",
-            "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-up-to ${input:package}",
-            "problemMatcher": [
-                "$gcc",
-                "$nvcc"
-            ]
-        },
-        {
-            "label": "Build: Package above (Release)",
-            "detail": "Build above package with release build type.",
-            "type": "shell",
-            "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-above ${input:package}",
-            "problemMatcher": [
-                "$gcc",
-                "$nvcc"
-            ]
-        },
-        {
-            "label": "Build: Package above (Debug)",
-            "detail": "Build above package with debug build type.",
-            "type": "shell",
-            "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-above ${input:package}",
-            "problemMatcher": [
-                "$gcc",
-                "$nvcc"
-            ]
-        },
-        // Test tasks
-        {
-            "label": "Test: All",
-            "detail": "Run all unit tests (all packages).",
-            "type": "shell",
-            "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon test-result --delete-yes && colcon test",
-            "problemMatcher": [
-                "$gcc",
-                "$nvcc"
-            ]
-        },
-        {
-            "label": "Test: Package",
-            "detail": "Run all unit tests (single package).",
-            "type": "shell",
-            "command": "colcon test-result --delete-yes && colcon test --packages-select ${input:package} --event-handlers console_cohesion+",
-            "problemMatcher": [
-                "$gcc",
-                "$nvcc"
-            ]
-        },
-        // Debug
-        {
-            "label": "Debug: Prelaunch",
-            "detail": "Source workspace and update environment for debugging.",
-            "command": "bash",
-            "args": [
-                "-c",
-                "source ${workspaceFolder}/install/setup.bash && printenv > ${workspaceFolder}/.vscode/.debug.env"
-            ],
-            "presentation": {
-                "reveal": "silent",
-                "revealProblems": "onProblem",
-                "close": true
-            },
-            "problemMatcher": []
-        },
-        // Clean
-        {
-            "label": "Clean: Colcon",
-            "detail": "Run the clean target",
-            "type": "shell",
-            "command": "colcon build --cmake-target clean",
-            "problemMatcher": [
-                "$gcc",
-                "$nvcc"
-            ]
-        },
-        {
-            "label": "Clean: Files",
-            "detail": "Purge workspace by deleting all generated files.",
-            "type": "shell",
-            "command": "sudo rm -rf build install log && sudo py3clean .",
-            "problemMatcher": []
-        },
-        // Workspace editing tasks
-        {
-            "label": "VCS: Import repositories",
-            "detail": "Use vcs to import all repositories from given repos file.",
-            "type": "shell",
-            "command": "mkdir -p src && vcs import src < ${input:reposFile}",
-            "problemMatcher": []
-        },
-        {
-            "label": "VCS: Pull repositories",
-            "detail": "Use vcs to pull the latest version of all repositories in the workspace.",
-            "type": "shell",
-            "command": "vcs pull src",
-            "problemMatcher": []
-        },
-        {
-            "label": "Install dependencies",
-            "detail": "Install all dependencies specified in the workspaces package.xml files.",
-            "type": "shell",
-            "command": "sudo apt update && rosdep install --from-paths src --ignore-src -yr || (rosdep update && rosdep install --from-paths src --ignore-src -yr)",
-            "problemMatcher": []
-        },
-        // Pre-commit
-        {
-            "label": "Pre-commit: Run",
-            "detail": "Run pre-commit hooks.",
-            "type": "shell",
-            "command": "cd ${input:precommitPath} && taskset --cpu-list 0-$(($(nproc) / 2 - 1)) pre-commit run --all --config .pre-commit-config.yaml",
-            "problemMatcher": []
-        },
-        // Pull CSpell
-        {
-            "label": "Pull CSpell dicts",
-            "detail": "Pull the latest version of the AWF CSpell configuration.",
-            "type": "shell",
-            "command": "wget -O .cspell.json https://raw.githubusercontent.com/autowarefoundation/autoware-spell-check-dict/main/.cspell.json && yarn global add https://github.com/tier4/cspell-dicts",
-            "problemMatcher": []
-        }
-    ],
-    "inputs": [
-        {
-            "id": "package",
-            "type": "promptString",
-            "description": "Package name.",
-            "default": ""
-        },
-        {
-            "id": "reposFile",
-            "type": "promptString",
-            "description": "Repos file name.",
-            "default": "${workspaceFolder}/autoware.repos"
-        },
-        {
-            "id": "precommitPath",
-            "type": "promptString",
-            "description": "Path to pre-commit config file directory.",
-            "default": "${workspaceFolder}/src/universe/autoware_universe"
-        }
-    ]
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json forma
+  "version": "2.0.0",
+  "tasks": [
+    // Build tasks
+    {
+      "label": "Build: Workspace (Release)",
+      "detail": "Build workspace with release build type.",
+      "type": "shell",
+      "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On",
+      "problemMatcher": ["$gcc", "$nvcc"]
+    },
+    {
+      "label": "Build: Workspace (Debug)",
+      "detail": "Build workspace with release build type.",
+      "type": "shell",
+      "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On",
+      "problemMatcher": ["$gcc", "$nvcc"]
+    },
+    {
+      "label": "Build: Package (Release)",
+      "detail": "Build single package with release build type.",
+      "type": "shell",
+      "command": "colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-select ${input:package}",
+      "problemMatcher": ["$gcc", "$nvcc"]
+    },
+    {
+      "label": "Build: Package (Debug)",
+      "detail": "Build single package with debug build type.",
+      "type": "shell",
+      "command": "colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-select ${input:package}",
+      "problemMatcher": ["$gcc", "$nvcc"]
+    },
+    {
+      "label": "Build: Package up-to (Release)",
+      "detail": "Build up-to package with release build type.",
+      "type": "shell",
+      "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-up-to ${input:package}",
+      "problemMatcher": ["$gcc", "$nvcc"]
+    },
+    {
+      "label": "Build: Package up-to (Debug)",
+      "detail": "Build up-to package with debug build type.",
+      "type": "shell",
+      "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-up-to ${input:package}",
+      "problemMatcher": ["$gcc", "$nvcc"]
+    },
+    {
+      "label": "Build: Package above (Release)",
+      "detail": "Build above package with release build type.",
+      "type": "shell",
+      "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-above ${input:package}",
+      "problemMatcher": ["$gcc", "$nvcc"]
+    },
+    {
+      "label": "Build: Package above (Debug)",
+      "detail": "Build above package with debug build type.",
+      "type": "shell",
+      "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-above ${input:package}",
+      "problemMatcher": ["$gcc", "$nvcc"]
+    },
+    // Test tasks
+    {
+      "label": "Test: All",
+      "detail": "Run all unit tests (all packages).",
+      "type": "shell",
+      "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon test-result --delete-yes && colcon test",
+      "problemMatcher": ["$gcc", "$nvcc"]
+    },
+    {
+      "label": "Test: Package",
+      "detail": "Run all unit tests (single package).",
+      "type": "shell",
+      "command": "colcon test-result --delete-yes && colcon test --packages-select ${input:package} --event-handlers console_cohesion+",
+      "problemMatcher": ["$gcc", "$nvcc"]
+    },
+    // Debug
+    {
+      "label": "Debug: Prelaunch",
+      "detail": "Source workspace and update environment for debugging.",
+      "command": "bash",
+      "args": [
+        "-c",
+        "source ${workspaceFolder}/install/setup.bash && printenv > ${workspaceFolder}/.vscode/.debug.env"
+      ],
+      "presentation": {
+        "reveal": "silent",
+        "revealProblems": "onProblem",
+        "close": true
+      },
+      "problemMatcher": []
+    },
+    // Clean
+    {
+      "label": "Clean: Colcon",
+      "detail": "Run the clean target",
+      "type": "shell",
+      "command": "colcon build --cmake-target clean",
+      "problemMatcher": ["$gcc", "$nvcc"]
+    },
+    {
+      "label": "Clean: Files",
+      "detail": "Purge workspace by deleting all generated files.",
+      "type": "shell",
+      "command": "sudo rm -rf build install log && sudo py3clean .",
+      "problemMatcher": []
+    },
+    // Workspace editing tasks
+    {
+      "label": "VCS: Import repositories",
+      "detail": "Use vcs to import all repositories from given repos file.",
+      "type": "shell",
+      "command": "mkdir -p src && vcs import src < ${input:reposFile}",
+      "problemMatcher": []
+    },
+    {
+      "label": "VCS: Pull repositories",
+      "detail": "Use vcs to pull the latest version of all repositories in the workspace.",
+      "type": "shell",
+      "command": "vcs pull src",
+      "problemMatcher": []
+    },
+    {
+      "label": "Install dependencies",
+      "detail": "Install all dependencies specified in the workspaces package.xml files.",
+      "type": "shell",
+      "command": "sudo apt update && rosdep install --from-paths src --ignore-src -yr || (rosdep update && rosdep install --from-paths src --ignore-src -yr)",
+      "problemMatcher": []
+    },
+    // Pre-commit
+    {
+      "label": "Pre-commit: Run",
+      "detail": "Run pre-commit hooks.",
+      "type": "shell",
+      "command": "cd ${input:precommitPath} && taskset --cpu-list 0-$(($(nproc) / 2 - 1)) pre-commit run --all --config .pre-commit-config.yaml",
+      "problemMatcher": []
+    },
+    // Pull CSpell
+    {
+      "label": "Pull CSpell dicts",
+      "detail": "Pull the latest version of the AWF CSpell configuration.",
+      "type": "shell",
+      "command": "wget -O .cspell.json https://raw.githubusercontent.com/autowarefoundation/autoware-spell-check-dict/main/.cspell.json && yarn global add https://github.com/tier4/cspell-dicts",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "package",
+      "type": "promptString",
+      "description": "Package name.",
+      "default": ""
+    },
+    {
+      "id": "reposFile",
+      "type": "promptString",
+      "description": "Repos file name.",
+      "default": "${workspaceFolder}/autoware.repos"
+    },
+    {
+      "id": "precommitPath",
+      "type": "promptString",
+      "description": "Path to pre-commit config file directory.",
+      "default": "${workspaceFolder}/src/universe/autoware_universe"
+    }
+  ]
 }

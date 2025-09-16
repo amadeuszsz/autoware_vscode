@@ -51,10 +51,10 @@ docker pull ghcr.io/autowarefoundation/autoware:universe-devel-cuda
 
 1. Open VS Code
 2. Open Dev Container:
-   -  Open command palette (`Ctrl+Shift+P`)
-   -  Type and select `Dev Containers: Open Folder in Container...`
-   -  Select your Autoware workspace
-   -  Choose Dev Containers configuration (recommended: `universe-devel-cuda`) and wait till it's built.
+   - Open command palette (`Ctrl+Shift+P`)
+   - Type and select `Dev Containers: Open Folder in Container...`
+   - Select your Autoware workspace
+   - Choose Dev Containers configuration (recommended: `universe-devel-cuda`) and wait till it's built.
 3. Build the workspace:
    - Open command palette (`Ctrl+Shift+P`)
    - Type and select `Tasks: Run Task`

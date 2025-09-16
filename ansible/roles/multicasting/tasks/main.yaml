@@ -14,7 +14,7 @@
     dest: "{{ service_file_path }}"
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   become: true
   when: install_multicasting
 

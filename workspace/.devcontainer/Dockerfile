@@ -8,15 +8,19 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Default ccache max size
 ARG CCACHE_MAXSIZE="30G"
 
-# Metadata - should come early after FROM
+# User setup
+ARG USERNAME=autoware
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+ENV XDG_RUNTIME_DIR=/tmp/xdg/$USER_UID
+
+# Metadata
 LABEL maintainer="The Autoware Foundation" \
       description="Autoware development container with enhanced tooling" \
       version="0.1" \
       org.opencontainers.image.source="https://github.com/autowarefoundation/autoware" \
       org.opencontainers.image.vendor="The Autoware Foundation"
 
-# Global environment variables that don't change
-ENV SHELL=/bin/bash
 
 # Development and runtime environment variables
 ENV CYCLONEDDS_URI=file:///workspace/.devcontainer/cyclonedds_config.xml \
@@ -106,11 +110,6 @@ RUN CLANGD_VERSION=$(curl -fsSL "https://api.github.com/repos/clangd/clangd/rele
   && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* "$HOME"/.cache
 
 # Add user
-ARG USERNAME=autoware
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-ENV XDG_RUNTIME_DIR=/tmp/xdg/$USER_UID
-
 RUN groupadd --gid "$USER_GID" "$USERNAME" \
   && useradd --uid "$USER_UID" --gid "$USER_GID" -m "$USERNAME" \
   && echo "$USERNAME" ALL=\(root\) NOPASSWD:ALL > "/etc/sudoers.d/$USERNAME" \
@@ -126,6 +125,10 @@ RUN groupadd --gid "$USER_GID" "$USERNAME" \
 # Final user and workspace setup
 USER $USERNAME
 WORKDIR /workspace
+
+# Setup colcon mixin for user
+RUN colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/refs/heads/master/index.yaml && \
+    colcon mixin update default
 
 # Setup ccache configuration
 RUN ccache --max-size="${CCACHE_MAXSIZE}" \

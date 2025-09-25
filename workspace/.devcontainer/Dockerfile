@@ -21,6 +21,8 @@ LABEL maintainer="The Autoware Foundation" \
       org.opencontainers.image.source="https://github.com/autowarefoundation/autoware" \
       org.opencontainers.image.vendor="The Autoware Foundation"
 
+# Global environment variables that don't change
+ENV SHELL=/bin/bash
 
 # Development and runtime environment variables
 ENV CYCLONEDDS_URI=file:///workspace/.devcontainer/cyclonedds_config.xml \

@@ -49,7 +49,7 @@
         "twxs.cmake",
         "timonwong.shellcheck",
         "foxundermoon.shell-format",
-        "ms-python.autopep8",
+        "ms-python.black-formatter",
         "ms-python.debugpy",
         "ms-python.python",
         "ms-python.vscode-pylance",

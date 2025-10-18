@@ -26,7 +26,7 @@ ENV SHELL=/bin/bash
 
 # Development and runtime environment variables
 ENV CYCLONEDDS_URI=file:///workspace/.devcontainer/cyclonedds_config.xml \
-    PYTHONPATH=/home/autoware/.local/bin \
+    PATH=/home/autoware/.local/bin \
     RCUTILS_COLORIZED_OUTPUT=1 \
     RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}]: {message} ({function_name}() at {file_name}:{line_number})" \
     CCACHE_DIR=/ccache \

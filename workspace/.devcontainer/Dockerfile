@@ -26,7 +26,7 @@ ENV SHELL=/bin/bash
 
 # Development and runtime environment variables
 ENV CYCLONEDDS_URI=file:///workspace/.devcontainer/cyclonedds_config.xml \
-    PATH=/home/autoware/.local/bin \
+    PATH=${PATH}:/home/autoware/.local/bin \
     RCUTILS_COLORIZED_OUTPUT=1 \
     RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}]: {message} ({function_name}() at {file_name}:{line_number})" \
     CCACHE_DIR=/ccache \
@@ -47,9 +47,8 @@ RUN echo 'if [ -f "/workspace/install/setup.bash" ]; then' >> /etc/skel/.bashrc 
   && echo '  source "/workspace/install/setup.bash"' >> /etc/skel/.bashrc \
   && echo 'fi' >> /etc/skel/.bashrc
 
-# Update ROS key and repository configuration, then install packages via apt-get
-RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros2-latest-archive-keyring.gpg \
-  && apt-get update \
+# Install packages via apt-get
+RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   bash-completion \
   ccache \
@@ -70,6 +69,9 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o 
   valgrind \
   vim \
   && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* "$HOME"/.cache
+
+# Update ROS GPG key
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros2-latest-archive-keyring.gpg
 
 # Install packages via pip
 RUN python3 -m pip install --no-cache-dir --root / \

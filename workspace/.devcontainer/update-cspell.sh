@@ -9,7 +9,7 @@ CSPELL_URL="https://raw.githubusercontent.com/autowarefoundation/autoware-spell-
 cd "$WORKSPACE_DIR"
 
 echo "Refreshing CSpell configuration..."
-curl -fsSL "$CSPELL_URL" -o .cspell.json
+curl -fsSL "$CSPELL_URL" -o .devcontainer/.cspell-shared.json
 
 if command -v yarn >/dev/null 2>&1; then
     echo "Refreshing Tier IV CSpell dictionaries..."

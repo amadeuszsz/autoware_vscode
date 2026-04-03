@@ -17,6 +17,7 @@
   "hostRequirements": {
     "gpu": true
   },
+  "postCreateCommand": "bash .devcontainer/install-deps.sh && bash .devcontainer/update-cspell.sh",
   "privileged": true,
   "init": true,
   "containerEnv": {

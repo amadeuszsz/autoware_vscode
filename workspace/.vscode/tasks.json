@@ -166,9 +166,6 @@
       "detail": "Install all dependencies specified in the workspace package.xml files.",
       "type": "shell",
       "command": "bash ${workspaceFolder}/.devcontainer/install-deps.sh",
-      "runOptions": {
-        "runOn": "folderOpen"
-      },
       "problemMatcher": []
     },
     {
@@ -186,9 +183,6 @@
       "detail": "Refresh the Autoware CSpell configuration and dictionaries.",
       "type": "shell",
       "command": "bash ${workspaceFolder}/.devcontainer/update-cspell.sh",
-      "runOptions": {
-        "runOn": "folderOpen"
-      },
       "problemMatcher": []
     }
   ],

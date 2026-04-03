@@ -1,4 +1,4 @@
-# hadolint global ignore=DL3006,DL3008,DL3013,DL3016
+# hadolint global ignore=DL3006,DL3008,DL3013,DL3016,DL3059
 ARG BASE_IMAGE
 FROM $BASE_IMAGE
 
@@ -7,12 +7,15 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Default ccache max size
 ARG CCACHE_MAXSIZE="30G"
+ARG CLANGD_VERSION=""
+ARG INSTALL_CUDA_TOOLS="0"
+ARG LICHTBLICK_VERSION=""
 
 # User setup
 ARG USERNAME=autoware
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
-ENV XDG_RUNTIME_DIR=/tmp/xdg/$USER_UID
+ENV XDG_RUNTIME_DIR=/tmp/xdg
 
 # Metadata
 LABEL maintainer="The Autoware Foundation" \
@@ -49,25 +52,30 @@ RUN echo 'if [ -f "/workspace/install/setup.bash" ]; then' >> /etc/skel/.bashrc 
 
 # Install packages via apt-get
 RUN apt-get update \
-  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-  bash-completion \
-  ccache \
-  clang \
-  curl \
-  gdb \
-  gdbserver \
-  gh \
-  htop \
-  jq \
-  kcachegrind \
-  nvidia-cuda-gdb \
-  python3-platformdirs \
-  python3-tomli \
-  python3-xmlschema \
-  sudo \
-  unzip \
-  valgrind \
-  vim \
+  && packages=( \
+    bash-completion \
+    ccache \
+    clang \
+    curl \
+    gdb \
+    gdbserver \
+    gh \
+    htop \
+    jq \
+    kcachegrind \
+    python3-pip \
+    python3-platformdirs \
+    python3-tomli \
+    python3-xmlschema \
+    ripgrep \
+    sudo \
+    unzip \
+    valgrind \
+    vim \
+    wget \
+  ) \
+  && if [[ "${INSTALL_CUDA_TOOLS}" == "1" ]]; then packages+=(nvidia-cuda-gdb); fi \
+  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${packages[@]}" \
   && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* "$HOME"/.cache
 
 # Update ROS GPG key
@@ -76,6 +84,7 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o 
 # Install packages via pip
 RUN python3 -m pip install --no-cache-dir --root / \
   check-jsonschema \
+  pre-commit \
   pydot \
   transforms3d==0.4.2
 
@@ -89,8 +98,10 @@ RUN curl -sL https://deb.nodesource.com/setup_22.x -o /tmp/nodesource_setup.sh \
   && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* "$HOME"/.cache
 
 # Install lichtblick
-RUN LICHTBLICK_VERSION=$(curl -fsSL "https://api.github.com/repos/lichtblick-suite/lichtblick/releases/latest" | jq -r '.tag_name' | sed 's/^v//') \
-  && echo "Installing Lichtblick version: $LICHTBLICK_VERSION" \
+RUN if [[ -z "${LICHTBLICK_VERSION}" ]]; then \
+      LICHTBLICK_VERSION="$(curl -fsSL "https://api.github.com/repos/lichtblick-suite/lichtblick/releases/latest" | jq -r '.tag_name' | sed 's/^v//')"; \
+    fi \
+  && echo "Installing Lichtblick version: ${LICHTBLICK_VERSION}" \
   && apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   libappindicator3-1 \
@@ -104,8 +115,10 @@ RUN LICHTBLICK_VERSION=$(curl -fsSL "https://api.github.com/repos/lichtblick-sui
   && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* "$HOME"/.cache
 
 # Install clangd
-RUN CLANGD_VERSION=$(curl -fsSL "https://api.github.com/repos/clangd/clangd/releases/latest" | jq -r '.tag_name') \
-  && echo "Installing clangd version: $CLANGD_VERSION" \
+RUN if [[ -z "${CLANGD_VERSION}" ]]; then \
+      CLANGD_VERSION="$(curl -fsSL "https://api.github.com/repos/clangd/clangd/releases/latest" | jq -r '.tag_name')"; \
+    fi \
+  && echo "Installing clangd version: ${CLANGD_VERSION}" \
   && apt-get update \
   && curl -fsSL -o /tmp/clangd-linux.zip "https://github.com/clangd/clangd/releases/download/${CLANGD_VERSION}/clangd-linux-${CLANGD_VERSION}.zip" \
   && unzip /tmp/clangd-linux.zip -d /opt/ \
@@ -120,9 +133,9 @@ RUN groupadd --gid "$USER_GID" "$USERNAME" \
   && chmod 0440 "/etc/sudoers.d/$USERNAME" \
   && mkdir "/home/$USERNAME/.config" \
   && mkdir -p /ccache \
+  && mkdir -p "$XDG_RUNTIME_DIR" \
   && chown -R "$USERNAME":"$USERNAME" "/home/$USERNAME/.config" \
   && chown -R "$USERNAME":"$USERNAME" /ccache \
-  && mkdir -p "$XDG_RUNTIME_DIR" \
   && chmod 700 "$XDG_RUNTIME_DIR" \
   && chown -R "$USERNAME":"$USERNAME" "$XDG_RUNTIME_DIR"
 

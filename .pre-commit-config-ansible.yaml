@@ -3,5 +3,6 @@ repos:
     rev: v26.4.0
     hooks:
       - id: ansible-lint
+        language_version: python3
         additional_dependencies:
           - ansible

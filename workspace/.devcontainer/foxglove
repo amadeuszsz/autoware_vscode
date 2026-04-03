@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# Exit immediately if a command exits with a non-zero status.
-set -e
+set -euo pipefail
 
 # --- Script Configuration ---
 # Default port for the Foxglove WebSocket server.
@@ -13,29 +12,29 @@ BRIDGE_PID=
 # Displays usage information for the script.
 show_help() {
     cat <<EOF
-Usage: $(basename "$0") [-h|--help] [--port PORT] [ros_launch_args...]
+Usage: $(basename "$0") [-h|--help] [port:=PORT] [ros_launch_args...]
 
 Launches the Foxglove bridge and lichtblick client.
 
-This script first terminates any existing Foxglove bridge instances. It then launches a new bridge and the lichtblick client.
+This script launches a Foxglove bridge on the requested port and then opens the lichtblick client.
 ROS 2 workspaces must be sourced before running this script.
 
 OPTIONS:
   -h, --help        Show this help message and exit.
-  --port PORT       Specify the WebSocket port for the bridge. Defaults to ${DEFAULT_PORT}.
+  port:=PORT        Specify the WebSocket port using ROS-style syntax.
 
 EXAMPLES:
   # Launch with default settings
   $(basename "$0")
 
   # Launch on a custom port
-  $(basename "$0") --port 8766
+  $(basename "$0") port:=8766
 
   # Pass arguments to 'ros2 launch'
   $(basename "$0") use_sim_time:=True
 
   # Combine a custom port and ROS arguments
-  $(basename "$0") --port 8766 use_sim_time:=True
+  $(basename "$0") port:=8766 use_sim_time:=True
 EOF
 }
 
@@ -63,15 +62,13 @@ main() {
             show_help
             exit 0
             ;;
-        --port)
-            # Check if the port number is a valid integer in the correct range
-            if [[ -n $2 && $2 =~ ^[0-9]+$ && $2 -ge 1024 && $2 -le 65535 ]]; then
-                port="$2"
-                shift 2 # Consume '--port' and its value
-            else
-                echo "Error: --port requires a valid port number (1024-65535)." >&2
+        port:=*)
+            port="${1#port:=}"
+            if [[ ! $port =~ ^[0-9]+$ || $port -lt 1024 || $port -gt 65535 ]]; then
+                echo "Error: port:= requires a valid port number (1024-65535)." >&2
                 exit 1
             fi
+            shift
             ;;
         *)
             # Assume all other arguments are for ros2 launch
@@ -81,11 +78,26 @@ main() {
         esac
     done
 
+    if ! command -v ros2 >/dev/null 2>&1; then
+        echo "Error: ros2 is not available. Source the workspace before running this command." >&2
+        exit 1
+    fi
+
+    if ! command -v lichtblick >/dev/null 2>&1; then
+        echo "Error: lichtblick is not installed in this container." >&2
+        exit 1
+    fi
+
+    if ! command -v ss >/dev/null 2>&1; then
+        echo "Error: ss is not available in this container." >&2
+        exit 1
+    fi
+
     # --- Port Availability Check ---
     echo "Checking if port ${port} is available..."
     if ss -tuln | grep -q ":${port}\b"; then
         echo "Error: Port ${port} is already in use." >&2
-        echo "Please free the port or use the --port option to specify another." >&2
+        echo "Please free the port or use port:=PORT to specify another." >&2
         # You can optionally show which process is using the port if 'lsof' is available
         if command -v lsof &>/dev/null; then
             echo "Port is being used by:"
@@ -95,10 +107,6 @@ main() {
     fi
 
     # --- Execution ---
-    echo "Terminating any existing Foxglove bridge instances..."
-    # Use pkill to find and kill processes matching the launch file name
-    pkill -f "foxglove_bridge_launch.xml" >/dev/null 2>&1 || true # '|| true' prevents exit on no-match
-
     echo "Launching Foxglove bridge on port ${port}..."
     # Launch the bridge in the background
     ros2 launch foxglove_bridge foxglove_bridge_launch.xml \

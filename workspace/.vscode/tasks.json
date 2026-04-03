@@ -3,65 +3,106 @@
   "tasks": [
     {
       "label": "Build: Workspace (Release)",
-      "detail": "Build workspace with release build type.",
+      "detail": "Build workspace with release build type. Uses the selected CPU core fraction to limit CPU usage.",
       "type": "shell",
-      "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On",
+      "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
     {
       "label": "Build: Workspace (Debug)",
-      "detail": "Build workspace with release build type.",
+      "detail": "Build workspace with debug build type. Uses the selected CPU core fraction to limit CPU usage.",
       "type": "shell",
-      "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On",
+      "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
     {
       "label": "Build: Package (Release)",
-      "detail": "Build single package with release build type.",
+      "detail": "Build single package with release build type. The selected CPU core fraction is effectively ignored because single-package builds use one core.",
       "type": "shell",
-      "command": "colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-select ${input:package}",
+      "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-select ${input:package}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
     {
       "label": "Build: Package (Debug)",
-      "detail": "Build single package with debug build type.",
+      "detail": "Build single package with debug build type. The selected CPU core fraction is effectively ignored because single-package builds use one core.",
       "type": "shell",
-      "command": "colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-select ${input:package}",
+      "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-select ${input:package}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": ["$gcc", "$nvcc"]
+    },
+    {
+      "label": "Clean Build: Package (Release)",
+      "detail": "Remove the selected package from build and install, then rebuild it with release build type. The selected CPU core fraction is effectively ignored because single-package builds use one core.",
+      "type": "shell",
+      "command": "bash -lc 'rm -rf \"${workspaceFolder}/build/${input:package}\" \"${workspaceFolder}/install/${input:package}\" && exec bash \"${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh\" \"${input:cpuFraction}\" -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-select \"${input:package}\"'",
+      "problemMatcher": ["$gcc", "$nvcc"]
+    },
+    {
+      "label": "Clean Build: Package (Debug)",
+      "detail": "Remove the selected package from build and install, then rebuild it with debug build type. The selected CPU core fraction is effectively ignored because single-package builds use one core.",
+      "type": "shell",
+      "command": "bash -lc 'rm -rf \"${workspaceFolder}/build/${input:package}\" \"${workspaceFolder}/install/${input:package}\" && exec bash \"${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh\" \"${input:cpuFraction}\" -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-select \"${input:package}\"'",
       "problemMatcher": ["$gcc", "$nvcc"]
     },
     {
       "label": "Build: Package up-to (Release)",
-      "detail": "Build up-to package with release build type.",
+      "detail": "Build up-to package with release build type. Uses the selected CPU core fraction to limit CPU usage.",
       "type": "shell",
-      "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-up-to ${input:package}",
+      "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-up-to ${input:package}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
     {
       "label": "Build: Package up-to (Debug)",
-      "detail": "Build up-to package with debug build type.",
+      "detail": "Build up-to package with debug build type. Uses the selected CPU core fraction to limit CPU usage.",
       "type": "shell",
-      "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-up-to ${input:package}",
+      "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-up-to ${input:package}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
     {
       "label": "Build: Package above (Release)",
-      "detail": "Build above package with release build type.",
+      "detail": "Build above package with release build type. Uses the selected CPU core fraction to limit CPU usage.",
       "type": "shell",
-      "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-above ${input:package}",
+      "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-above ${input:package}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
     {
       "label": "Build: Package above (Debug)",
-      "detail": "Build above package with debug build type.",
+      "detail": "Build above package with debug build type. Uses the selected CPU core fraction to limit CPU usage.",
       "type": "shell",
-      "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-above ${input:package}",
+      "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-above ${input:package}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
     {
       "label": "Test: All",
       "detail": "Run all unit tests (all packages).",
       "type": "shell",
-      "command": "taskset --cpu-list 0-$(($(nproc) / 2 - 1)) colcon test-result --delete-yes && colcon test",
+      "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- bash -lc 'colcon test-result --delete-yes && colcon test'",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
     {
@@ -69,6 +110,9 @@
       "detail": "Run all unit tests (single package).",
       "type": "shell",
       "command": "colcon test-result --delete-yes && colcon test --packages-select ${input:package} --event-handlers console_cohesion+",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
     {
@@ -91,34 +135,37 @@
       "detail": "Run the clean target",
       "type": "shell",
       "command": "colcon build --cmake-target clean",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
     {
       "label": "Clean: Files",
       "detail": "Purge workspace by deleting all generated files.",
       "type": "shell",
-      "command": "sudo rm -rf build install log && sudo py3clean .",
+      "command": "sudo rm -rf \"${workspaceFolder}/build\" \"${workspaceFolder}/install\" \"${workspaceFolder}/log\" && sudo py3clean \"${workspaceFolder}\"",
       "problemMatcher": []
     },
     {
       "label": "VCS: Import repositories",
       "detail": "Use vcs to import all repositories from given repos file.",
       "type": "shell",
-      "command": "mkdir -p src && vcs import src < ${input:reposFile}",
+      "command": "bash -lc 'mkdir -p \"${workspaceFolder}/src\" && vcs import \"${workspaceFolder}/src\" < \"${input:reposFile}\"'",
       "problemMatcher": []
     },
     {
       "label": "VCS: Pull repositories",
       "detail": "Use vcs to pull the latest version of all repositories in the workspace.",
       "type": "shell",
-      "command": "vcs pull src",
+      "command": "vcs pull \"${workspaceFolder}/src\"",
       "problemMatcher": []
     },
     {
-      "label": "Install dependencies",
-      "detail": "Install all dependencies specified in the workspaces package.xml files.",
+      "label": "Deps: Install ROS Dependencies",
+      "detail": "Install all dependencies specified in the workspace package.xml files.",
       "type": "shell",
-      "command": "sudo apt update && rosdep install --from-paths src --ignore-src -yr || (rosdep update && rosdep install --from-paths src --ignore-src -yr)",
+      "command": "bash ${workspaceFolder}/.devcontainer/install-deps.sh",
       "runOptions": {
         "runOn": "folderOpen"
       },
@@ -128,14 +175,17 @@
       "label": "Pre-commit: Run",
       "detail": "Run pre-commit hooks.",
       "type": "shell",
-      "command": "cd ${input:precommitPath} && taskset --cpu-list 0-$(($(nproc) / 2 - 1)) pre-commit run --all --config .pre-commit-config.yaml",
+      "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- pre-commit run --all --config ${input:precommitConfig}",
+      "options": {
+        "cwd": "${input:precommitPath}"
+      },
       "problemMatcher": []
     },
     {
-      "label": "Pull CSpell dicts",
-      "detail": "Pull the latest version of the AWF CSpell configuration.",
+      "label": "Spellcheck: Update Dictionaries",
+      "detail": "Refresh the Autoware CSpell configuration and dictionaries.",
       "type": "shell",
-      "command": "wget -O .cspell.json https://raw.githubusercontent.com/autowarefoundation/autoware-spell-check-dict/main/.cspell.json && yarn global add https://github.com/tier4/cspell-dicts",
+      "command": "bash ${workspaceFolder}/.devcontainer/update-cspell.sh",
       "runOptions": {
         "runOn": "folderOpen"
       },
@@ -153,13 +203,25 @@
       "id": "reposFile",
       "type": "promptString",
       "description": "Repos file name.",
-      "default": "${workspaceFolder}/autoware.repos"
+      "default": "${workspaceFolder}/repositories/autoware.repos"
     },
     {
       "id": "precommitPath",
       "type": "promptString",
       "description": "Path to pre-commit config file directory.",
       "default": "${workspaceFolder}/src/universe/autoware_universe"
+    },
+    {
+      "id": "precommitConfig",
+      "type": "promptString",
+      "description": "Pre-commit config file name.",
+      "default": ".pre-commit-config.yaml"
+    },
+    {
+      "id": "cpuFraction",
+      "type": "promptString",
+      "description": "Fraction of CPU cores to pin with taskset (0.0 disables pinning, 1.0 uses all cores).",
+      "default": "0.5"
     }
   ]
 }

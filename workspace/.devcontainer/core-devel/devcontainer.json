@@ -4,37 +4,46 @@
     "context": "../..",
     "dockerfile": "../Dockerfile",
     "args": {
-      "BASE_IMAGE": "ghcr.io/autowarefoundation/autoware:core-devel"
+      "BASE_IMAGE": "ghcr.io/autowarefoundation/autoware:core-devel",
+      "INSTALL_CUDA_TOOLS": "0"
     },
     "options": ["--network=host"]
   },
   "remoteUser": "autoware",
+  "containerUser": "autoware",
+  "updateRemoteUserUID": true,
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
   "workspaceFolder": "/workspace",
+  "privileged": true,
+  "init": true,
+  "containerEnv": {
+    "DISPLAY": "${localEnv:DISPLAY}",
+    "XAUTHORITY": "${localEnv:XAUTHORITY}",
+    "XDG_RUNTIME_DIR": "/tmp/xdg"
+  },
+  "mounts": [
+    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind",
+    "source=/etc/localtime,target=/etc/localtime,type=bind,readonly",
+    "source=/dev/dri,target=/dev/dri,type=bind,readonly",
+    "source=${localEnv:HOME}/autoware_data,target=/home/autoware/autoware_data,type=bind",
+    "source=${localEnv:HOME}/autoware_map,target=/home/autoware/autoware_map,type=bind",
+    "source=${localEnv:HOME}/.ssh,target=/home/autoware/.ssh,type=bind",
+    "source=${localEnv:HOME}/.webauto,target=/home/autoware/.webauto,type=bind",
+    "source=${localEnv:HOME}/.config/Lichtblick,target=/home/autoware/.config/Lichtblick,type=bind",
+    "source=${localEnv:HOME}/.ccache,target=/ccache,type=bind"
+  ],
   "runArgs": [
-    "-it",
     "--rm",
     "--name=${localWorkspaceFolderBasename}",
-    "--privileged",
-    "--env",
-    "DISPLAY=${env:DISPLAY}",
-    "--env",
-    "XAUTHORITY=${env:XAUTHORITY}",
     "--net=host",
     "--pid=host",
-    "--volume=/tmp/.X11-unix/:/tmp/.X11-unix",
-    "--volume=/etc/localtime:/etc/localtime:ro",
-    "--volume=/dev/dri:/dev/dri:ro",
-    "--volume=${env:HOME}/autoware_data:/home/autoware/autoware_data",
-    "--volume=${env:HOME}/autoware_map:/home/autoware/autoware_map",
-    "--volume=${env:HOME}/.ssh:/home/autoware/.ssh",
-    "--volume=${env:HOME}/.webauto:/home/autoware/.webauto",
-    "--volume=${env:HOME}/.config/Lichtblick:/home/autoware/.config/Lichtblick",
-    "--volume=${env:HOME}/.ccache:/ccache"
+    "--ipc=host",
+    "--ulimit=memlock=-1",
+    "--ulimit=stack=67108864"
   ],
   "customizations": {
     "vscode": {
-      "settings.json": {
+      "settings": {
         "terminal.integrated.profiles.linux": {
           "bash": {
             "path": "/bin/bash"
@@ -42,25 +51,22 @@
         }
       },
       "extensions": [
-        "Ranch-Hand-Robotics.rde-pack",
         "cschlosser.doxdocgen",
-        "llvm-vs-code-extensions.vscode-clangd",
-        "ms-vscode.cpptools-extension-pack",
-        "twxs.cmake",
-        "timonwong.shellcheck",
+        "eamodio.gitlens",
         "foxundermoon.shell-format",
+        "github.vscode-pull-request-github",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "ms-azuretools.vscode-docker",
         "ms-python.black-formatter",
         "ms-python.debugpy",
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "eamodio.gitlens",
-        "github.vscode-pull-request-github",
-        "ms-azuretools.vscode-docker",
-        "ms-vscode.remote-explorer",
-        "ms-vscode-remote.vscode-remote-extensionpack",
+        "Ranch-Hand-Robotics.rde-pack",
         "redhat.vscode-xml",
         "redhat.vscode-yaml",
         "streetsidesoftware.code-spell-checker",
+        "timonwong.shellcheck",
+        "twxs.cmake",
         "yzhang.markdown-all-in-one"
       ]
     }

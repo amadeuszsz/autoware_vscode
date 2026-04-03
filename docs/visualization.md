@@ -12,14 +12,14 @@ The development environment includes several visualization tools:
 
 Lichtblick is an OSS fork of "Foxglove Studio" and is a powerful visualization tool for robotics data.
 
-### Starting Foxglove
+### Starting Lichtblick
 
 ```bash
-# Basic usage
+# Start the bridge and Lichtblick client
 foxglove
 
 # With custom port
-foxglove --port 8766
+foxglove port:=8766
 
 # With ROS arguments
 foxglove use_sim_time:=True

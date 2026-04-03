@@ -14,8 +14,8 @@ This repository provides a complete development environment for Autoware project
 
 ### 1. Requirements
 
-- **Ubuntu 22.04** operating system
-- **NVIDIA GPU** for CUDA support
+- **Ubuntu 22.04 or 24.04** operating system
+- **NVIDIA GPU** only if you plan to use the `universe-devel-cuda` profile
 
 ### 2. Host Setup
 
@@ -28,22 +28,27 @@ git clone https://github.com/amadeuszsz/autoware_vscode.git ~/autoware_vscode
 sudo apt purge ansible
 sudo apt -y update && sudo apt -y install pipx
 python3 -m pipx ensurepath
-pipx install --include-deps --force "ansible==6.*"
+pipx install --include-deps --force "ansible==10.*"
 pipx ensurepath && source ~/.bashrc
-cd ~/autoware_vscode && ansible-galaxy collection install -f -r "ansible-galaxy-requirements.yaml"
-ansible-playbook autoware_vscode.dev_env.setup_host -K
+
+# Configure the host
+cd ~/autoware_vscode
+ansible-playbook ansible/playbooks/setup_host.yaml -K
 ```
 
 ### 3. Workspace Setup
 
 ```bash
+# Clone your Autoware-based project (we use the main Autoware repository as an example)
 git clone https://github.com/autowarefoundation/autoware.git ~/autoware
 mkdir -p ~/autoware/src && cd ~/autoware
-vcs import src < autoware.repos
-vcs import src < autoware-nightly.repos
+
+# Note: your repos files may be located in a different path
+vcs import src < repositories/autoware.repos
+vcs import src < repositories/autoware-nightly.repos
 
 # Setup your development environment
-cd ~/autoware_vscode && ./setup_workspace.sh ~/autoware
+cd ~/autoware_vscode && ./setup_workspace.sh --yes ~/autoware
 
 # Pull docker image (you might need to reboot to apply group Docker permissions)
 docker pull ghcr.io/autowarefoundation/autoware:universe-devel-cuda
@@ -56,7 +61,11 @@ docker pull ghcr.io/autowarefoundation/autoware:universe-devel-cuda
    - Open command palette (`Ctrl+Shift+P`)
    - Type and select `Dev Containers: Open Folder in Container...`
    - Select your Autoware workspace
-   - Choose Dev Containers configuration (recommended: `universe-devel-cuda`) and wait till it's built.
+   - Choose a Dev Container configuration:
+     - `core-devel`: lightweight core Autoware setup
+     - `universe-devel`: full Autoware Universe setup without CUDA
+     - `universe-devel-cuda`: full Autoware Universe setup with CUDA
+   - Wait until the container is built and the startup tasks finish
 3. Build the workspace:
    - Open command palette (`Ctrl+Shift+P`)
    - Type and select `Tasks: Run Task`
@@ -66,6 +75,12 @@ docker pull ghcr.io/autowarefoundation/autoware:universe-devel-cuda
    - Open any C++ related file in VS Code
    - Wait till the indexing is complete
 5. Start development!
+
+## Notes
+
+- `setup_workspace.sh` stores backups in `/tmp/autoware_vscode/backup/`.
+- The default mounted host paths are `~/autoware_data`, `~/autoware_map`, `~/.ssh`, `~/.webauto`, `~/.config/Lichtblick`, and `~/.ccache`.
+- VS Code runs the ROS dependency install task and the CSpell refresh task on folder open.
 
 ## Documentation
 

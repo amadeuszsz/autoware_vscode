@@ -22,7 +22,7 @@ This repository provides a complete development environment for Autoware project
 ```bash
 # Clone this repository
 sudo apt -y update && sudo apt -y install git
-git clone https://github.com/amadeuszsz/autoware_vscode.git ~/autoware_vscode
+git clone https://github.com/tier4/autoware_vscode.git ~/autoware_vscode
 
 # Install dependencies using Ansible (recommended)
 sudo apt purge ansible

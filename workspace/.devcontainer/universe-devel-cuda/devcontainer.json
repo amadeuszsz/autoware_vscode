@@ -17,7 +17,7 @@
   "hostRequirements": {
     "gpu": true
   },
-  "postCreateCommand": "bash .devcontainer/install-deps.sh && bash .devcontainer/update-cspell.sh",
+  "postCreateCommand": "bash .devcontainer/install-deps.sh && bash .devcontainer/update-cspell.sh && sudo sysctl -w kernel.yama.ptrace_scope=0",
   "privileged": true,
   "init": true,
   "containerEnv": {

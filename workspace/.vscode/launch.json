@@ -159,7 +159,6 @@
       "request": "attach",
       "program": "${workspaceFolder}/install/${input:package}/lib/${input:package}/${input:program}",
       "MIMode": "gdb",
-      "miDebuggerServerAddress": "localhost:4242",
       "processId": "${command:pickProcess}",
       "setupCommands": [
         {

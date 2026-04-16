@@ -5,11 +5,16 @@ FROM $BASE_IMAGE
 # Set shell to bash with pipefail for safer pipe handling
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+# Ensure root for installation steps
+USER root
+
 # Default ccache max size
 ARG CCACHE_MAXSIZE="30G"
 ARG CLANGD_VERSION=""
 ARG INSTALL_CUDA_TOOLS="0"
 ARG LICHTBLICK_VERSION=""
+ARG DEFAULT_ROS_DISTRO="humble"
+ARG SOURCE_SETUP_FILES
 
 # User setup
 ARG USERNAME=autoware
@@ -46,10 +51,6 @@ ENV GIT_PS1_SHOWDIRTYSTATE=1 \
     GIT_PS1_SHOWCOLORHINTS=1 \
     PROMPT_COMMAND="__git_ps1 '"'${VIRTUAL_ENV:+($(basename "$VIRTUAL_ENV")) }'"\[\033[01;33m\](container) \[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]' '$ '"
 
-RUN echo 'if [ -f "/workspace/install/setup.bash" ]; then' >> /etc/skel/.bashrc \
-  && echo '  source "/workspace/install/setup.bash"' >> /etc/skel/.bashrc \
-  && echo 'fi' >> /etc/skel/.bashrc
-
 # Install packages via apt-get
 RUN apt-get update \
   && packages=( \
@@ -85,8 +86,7 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o 
 RUN python3 -m pip install --no-cache-dir --root / \
   check-jsonschema \
   pre-commit \
-  pydot \
-  transforms3d==0.4.2
+  pydot
 
 # Install CSpell
 RUN curl -sL https://deb.nodesource.com/setup_22.x -o /tmp/nodesource_setup.sh \
@@ -106,7 +106,7 @@ RUN if [[ -z "${LICHTBLICK_VERSION}" ]]; then \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   libappindicator3-1 \
   libnotify4 \
-  ros-"$ROS_DISTRO"-foxglove-bridge \
+  ros-"${ROS_DISTRO:-${DEFAULT_ROS_DISTRO}}"-foxglove-bridge \
   xdg-utils \
   && curl -fsSL -o /tmp/lichtblick-linux-amd64.deb "https://github.com/lichtblick-suite/lichtblick/releases/download/v${LICHTBLICK_VERSION}/lichtblick-${LICHTBLICK_VERSION}-linux-amd64.deb" \
   && dpkg -i /tmp/lichtblick-linux-amd64.deb \
@@ -126,12 +126,39 @@ RUN if [[ -z "${CLANGD_VERSION}" ]]; then \
   && rm -rf /tmp/clangd-linux.zip \
   && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* "$HOME"/.cache
 
-# Add user
-RUN groupadd --gid "$USER_GID" "$USERNAME" \
-  && useradd --uid "$USER_UID" --gid "$USER_GID" -m "$USERNAME" \
+# Append setup file sources to /etc/skel/.bashrc (for new users) and to the existing user
+RUN IFS=';' read -ra _files <<< "${SOURCE_SETUP_FILES}" \
+  && for _f in "${_files[@]}"; do \
+       _f="$(echo "$_f" | xargs)"; \
+       [ -z "$_f" ] && continue; \
+       echo "if [ -f \"$_f\" ]; then source \"$_f\"; fi" >> /etc/skel/.bashrc; \
+     done \
+  && existing_home="$(getent passwd "$USER_UID" 2>/dev/null | cut -d: -f6 || true)"; \
+  if [ -n "$existing_home" ] && [ -f "$existing_home/.bashrc" ]; then \
+    IFS=';' read -ra _files <<< "${SOURCE_SETUP_FILES}"; \
+    for _f in "${_files[@]}"; do \
+      _f="$(echo "$_f" | xargs)"; \
+      [ -z "$_f" ] && continue; \
+      echo "if [ -f \"$_f\" ]; then source \"$_f\"; fi" >> "$existing_home/.bashrc"; \
+    done; \
+  fi
+
+# Add user (handle base images that may already provide the user/group)
+RUN existing_group="$(getent group "$USER_GID" 2>/dev/null | cut -d: -f1 || true)"; \
+  if [ -z "$existing_group" ]; then \
+    groupadd --gid "$USER_GID" "$USERNAME"; \
+  elif [ "$existing_group" != "$USERNAME" ]; then \
+    groupmod -n "$USERNAME" "$existing_group"; \
+  fi \
+  && existing_user="$(getent passwd "$USER_UID" 2>/dev/null | cut -d: -f1 || true)"; \
+  if [ -z "$existing_user" ]; then \
+    useradd --uid "$USER_UID" --gid "$USER_GID" -m "$USERNAME"; \
+  elif [ "$existing_user" != "$USERNAME" ]; then \
+    usermod -l "$USERNAME" -d "/home/$USERNAME" -m -g "$USER_GID" "$existing_user"; \
+  fi \
   && echo "$USERNAME" ALL=\(root\) NOPASSWD:ALL > "/etc/sudoers.d/$USERNAME" \
   && chmod 0440 "/etc/sudoers.d/$USERNAME" \
-  && mkdir "/home/$USERNAME/.config" \
+  && mkdir -p "/home/$USERNAME/.config" \
   && mkdir -p /ccache \
   && mkdir -p "$XDG_RUNTIME_DIR" \
   && chown -R "$USERNAME":"$USERNAME" "/home/$USERNAME/.config" \

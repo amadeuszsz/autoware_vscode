@@ -5,7 +5,9 @@
     "dockerfile": "../Dockerfile",
     "args": {
       "BASE_IMAGE": "ghcr.io/autowarefoundation/autoware:core-devel",
-      "INSTALL_CUDA_TOOLS": "0"
+      "INSTALL_CUDA_TOOLS": "0",
+      "DEFAULT_ROS_DISTRO": "humble",
+      "SOURCE_SETUP_FILES": "/opt/autoware/setup.bash;/workspace/install/setup.bash"
     },
     "options": ["--network=host"]
   },

@@ -126,6 +126,20 @@ RUN if [[ -z "${CLANGD_VERSION}" ]]; then \
   && rm -rf /tmp/clangd-linux.zip \
   && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* "$HOME"/.cache
 
+# Remove any existing NVIDIA driver related packages to avoid conflicts
+RUN apt-get update && \
+    apt-get purge -y \
+    "libnvidia-compute*" \
+    "nvidia-dkms-*" \
+    "nvidia-driver-*" \
+    "nvidia-kernel-*" \
+    "nvidia-persistenced*" \
+    "nvidia-settings*" \
+    "nvidia-utils-*" \
+    "xserver-xorg-video-nvidia-*" && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
 # Append setup file sources to /etc/skel/.bashrc (for new users) and to the existing user
 RUN IFS=';' read -ra _files <<< "${SOURCE_SETUP_FILES}" \
   && for _f in "${_files[@]}"; do \

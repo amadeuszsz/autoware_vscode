@@ -7,7 +7,8 @@
       "type": "shell",
       "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {"CCACHE_DIR": "/ccache"}
       },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
@@ -17,7 +18,8 @@
       "type": "shell",
       "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {"CCACHE_DIR": "/ccache"}
       },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
@@ -27,7 +29,8 @@
       "type": "shell",
       "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-select ${input:package}",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {"CCACHE_DIR": "/ccache"}
       },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
@@ -37,7 +40,8 @@
       "type": "shell",
       "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-select ${input:package}",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {"CCACHE_DIR": "/ccache"}
       },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
@@ -46,6 +50,10 @@
       "detail": "Remove the selected package from build and install, then rebuild it with release build type. The selected CPU core fraction is effectively ignored because single-package builds use one core.",
       "type": "shell",
       "command": "bash -lc 'rm -rf \"${workspaceFolder}/build/${input:package}\" \"${workspaceFolder}/install/${input:package}\" && exec bash \"${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh\" \"${input:cpuFraction}\" -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-select \"${input:package}\"'",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {"CCACHE_DIR": "/ccache"}
+      },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
     {
@@ -53,6 +61,10 @@
       "detail": "Remove the selected package from build and install, then rebuild it with debug build type. The selected CPU core fraction is effectively ignored because single-package builds use one core.",
       "type": "shell",
       "command": "bash -lc 'rm -rf \"${workspaceFolder}/build/${input:package}\" \"${workspaceFolder}/install/${input:package}\" && exec bash \"${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh\" \"${input:cpuFraction}\" -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-select \"${input:package}\"'",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {"CCACHE_DIR": "/ccache"}
+      },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
     {
@@ -61,7 +73,8 @@
       "type": "shell",
       "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-up-to ${input:package}",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {"CCACHE_DIR": "/ccache"}
       },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
@@ -71,7 +84,8 @@
       "type": "shell",
       "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-up-to ${input:package}",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {"CCACHE_DIR": "/ccache"}
       },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
@@ -81,7 +95,8 @@
       "type": "shell",
       "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-above ${input:package}",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {"CCACHE_DIR": "/ccache"}
       },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
@@ -91,7 +106,8 @@
       "type": "shell",
       "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On --packages-above ${input:package}",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {"CCACHE_DIR": "/ccache"}
       },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
@@ -101,7 +117,8 @@
       "type": "shell",
       "command": "bash ${workspaceFolder}/.devcontainer/run-with-cpu-fraction.sh ${input:cpuFraction} -- bash -lc 'colcon test-result --delete-yes && colcon test'",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {"CCACHE_DIR": "/ccache"}
       },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
@@ -111,7 +128,8 @@
       "type": "shell",
       "command": "colcon test-result --delete-yes && colcon test --packages-select ${input:package} --event-handlers console_cohesion+",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {"CCACHE_DIR": "/ccache"}
       },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
@@ -136,7 +154,8 @@
       "type": "shell",
       "command": "colcon build --cmake-target clean",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {"CCACHE_DIR": "/ccache"}
       },
       "problemMatcher": ["$gcc", "$nvcc"]
     },
